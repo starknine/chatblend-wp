@@ -1,11 +1,11 @@
 <?php
 
-if ( ! class_exists( 'WPPS_Settings' ) ) {
+if ( ! class_exists( 'CB_Settings' ) ) {
 
 	/**
 	 * Handles plugin settings and user profile meta fields
 	 */
-	class WPPS_Settings extends WPPS_Module {
+	class CB_Settings extends CB_Module {
 		protected $settings;
 		protected static $default_settings;
 		protected static $readable_properties  = array( 'settings' );
@@ -35,17 +35,17 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 		 * @mvc Controller
 		 *
 		 * @param string $variable
-		 * @param array  $value This will be merged with WPPS_Settings->settings, so it should mimic the structure of the WPPS_Settings::$default_settings. It only needs the contain the values that will change, though. See WordPress_Plugin_Skeleton->upgrade() for an example.
+		 * @param array  $value This will be merged with CB_Settings->settings, so it should mimic the structure of the CB_Settings::$default_settings. It only needs the contain the values that will change, though. See WordPress_Plugin_Skeleton->upgrade() for an example.
 		 */
 		public function __set( $variable, $value ) {
-			// Note: WPPS_Module::__set() is automatically called before this
+			// Note: CB_Module::__set() is automatically called before this
 
 			if ( $variable != 'settings' ) {
 				return;
 			}
 
 			$this->settings = self::validate_settings( $value );
-			update_option( 'wpps_settings', $this->settings );
+			update_option( 'cb_settings', $this->settings );
 		}
 
 		/**
@@ -55,11 +55,7 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 		 */
 		public function register_hook_callbacks() {
 			add_action( 'admin_menu',               __CLASS__ . '::register_settings_pages' );
-			add_action( 'show_user_profile',        __CLASS__ . '::add_user_fields' );
-			add_action( 'edit_user_profile',        __CLASS__ . '::add_user_fields' );
-			add_action( 'personal_options_update',  __CLASS__ . '::save_user_fields' );
-			add_action( 'edit_user_profile_update', __CLASS__ . '::save_user_fields' );
-
+			
 			add_action( 'init',                     array( $this, 'init' ) );
 			add_action( 'admin_init',               array( $this, 'register_settings' ) );
 
@@ -140,18 +136,11 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 		 * @return array
 		 */
 		protected static function get_default_settings() {
-			$basic = array(
-				'field-example1' => ''
-			);
-
-			$advanced = array(
-				'field-example2' => ''
-			);
+				
 
 			return array(
 				'db-version' => '0',
-				'basic'      => $basic,
-				'advanced'   => $advanced
+				'cb_api-key'      => ''				
 			);
 		}
 
@@ -165,7 +154,7 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 		protected static function get_settings() {
 			$settings = shortcode_atts(
 				self::$default_settings,
-				get_option( 'wpps_settings', array() )
+				get_option( 'cb_settings', array() )
 			);
 
 			return $settings;
@@ -180,8 +169,8 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 		 * @return array
 		 */
 		public static function add_plugin_action_links( $links ) {
-			array_unshift( $links, '<a href="http://wordpress.org/extend/plugins/wordpress-plugin-skeleton/faq/">Help</a>' );
-			array_unshift( $links, '<a href="options-general.php?page=' . 'wpps_settings">Settings</a>' );
+			array_unshift( $links, '<a href="http://chatblend.com/support.php">Help</a>' );
+			array_unshift( $links, '<a href="options-general.php?page=' . 'cb_settings">Settings</a>' );
 
 			return $links;
 		}
@@ -194,10 +183,10 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 		public static function register_settings_pages() {
 			add_submenu_page(
 				'options-general.php',
-				WPPS_NAME . ' Settings',
-				WPPS_NAME,
+				CB_NAME . ' Settings',
+				CB_NAME,
 				self::REQUIRED_CAPABILITY,
-				'wpps_settings',
+				'cb_settings',
 				__CLASS__ . '::markup_settings_page'
 			);
 		}
@@ -209,7 +198,7 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 		 */
 		public static function markup_settings_page() {
 			if ( current_user_can( self::REQUIRED_CAPABILITY ) ) {
-				echo self::render_template( 'wpps-settings/page-settings.php' );
+				echo self::render_template( 'cb-settings/page-settings.php' );
 			} else {
 				wp_die( 'Access denied.' );
 			}
@@ -225,46 +214,27 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 			 * Basic Section
 			 */
 			add_settings_section(
-				'wpps_section-basic',
-				'Basic Settings',
+				'cb_section-basic',
+				'Configure ChatBlend',
 				__CLASS__ . '::markup_section_headers',
-				'wpps_settings'
+				'cb_settings'
 			);
 
 			add_settings_field(
-				'wpps_field-example1',
-				'Example Field 1',
+				'cb_api-key',
+				'ChatBlend API Key',
 				array( $this, 'markup_fields' ),
-				'wpps_settings',
-				'wpps_section-basic',
-				array( 'label_for' => 'wpps_field-example1' )
+				'cb_settings',
+				'cb_section-basic',
+				array( 'label_for' => 'cb_api-key' )
 			);
 
-
-			/*
-			 * Advanced Section
-			 */
-			add_settings_section(
-				'wpps_section-advanced',
-				'Advanced Settings',
-				__CLASS__ . '::markup_section_headers',
-				'wpps_settings'
-			);
-
-			add_settings_field(
-				'wpps_field-example2',
-				'Example Field 2',
-				array( $this, 'markup_fields' ),
-				'wpps_settings',
-				'wpps_section-advanced',
-				array( 'label_for' => 'wpps_field-example2' )
-			);
 
 
 			// The settings container
 			register_setting(
-				'wpps_settings',
-				'wpps_settings',
+				'cb_settings',
+				'cb_settings',
 				array( $this, 'validate_settings' )
 			);
 		}
@@ -277,7 +247,7 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 		 * @param array $section
 		 */
 		public static function markup_section_headers( $section ) {
-			echo self::render_template( 'wpps-settings/page-settings-section-headers.php', array( 'section' => $section ), 'always' );
+			echo self::render_template( 'cb-settings/page-settings-section-headers.php', array( 'section' => $section ), 'always' );
 		}
 
 		/**
@@ -289,12 +259,12 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 		 */
 		public function markup_fields( $field ) {
 			switch ( $field['label_for'] ) {
-				case 'wpps_field-example1':
+				case 'cb_api-key':
 					// Do any extra processing here
 					break;
 			}
 
-			echo self::render_template( 'wpps-settings/page-settings-fields.php', array( 'settings' => $this->settings, 'field' => $field ), 'always' );
+			echo self::render_template( 'cb-settings/page-settings-fields.php', array( 'settings' => $this->settings, 'field' => $field ), 'always' );
 		}
 
 		/**
@@ -309,85 +279,21 @@ if ( ! class_exists( 'WPPS_Settings' ) ) {
 			$new_settings = shortcode_atts( $this->settings, $new_settings );
 
 			if ( ! is_string( $new_settings['db-version'] ) ) {
-				$new_settings['db-version'] = WordPress_Plugin_Skeleton::VERSION;
+				$new_settings['db-version'] = ChatBlend::VERSION;
 			}
-
 
 			/*
 			 * Basic Settings
 			 */
 
-			if ( strcmp( $new_settings['basic']['field-example1'], 'valid data' ) !== 0 ) {
-				add_notice( 'Example 1 must equal "valid data"', 'error' );
-				$new_settings['basic']['field-example1'] = self::$default_settings['basic']['field-example1'];
+			//if ( strcmp( $new_settings['cb_api-key'], 'valid data' ) !== 0 ) {
+			if (! strlen( $new_settings['cb_api-key']) > 0 ) {
+				//add_notice( 'Example 1 must equal "valid data"', 'error' );
+				$new_settings['cb_api-key'] = self::$default_settings['cb_api-key'];
 			}
-
-
-			/*
-			 * Advanced Settings
-			 */
-
-			$new_settings['advanced']['field-example2'] = absint( $new_settings['advanced']['field-example2'] );
-
-
+			
 			return $new_settings;
 		}
 
-
-		/*
-		 * User Settings
-		 */
-
-		/**
-		 * Adds extra option fields to a user's profile
-		 *
-		 * @mvc Controller
-		 *
-		 * @param object
-		 */
-		public static function add_user_fields( $user ) {
-			echo self::render_template( 'wpps-settings/user-fields.php', array( 'user' => $user ) );
-		}
-
-		/**
-		 * Validates and saves the values of extra user fields to the database
-		 *
-		 * @mvc Controller
-		 *
-		 * @param int $user_id
-		 */
-		public static function save_user_fields( $user_id ) {
-			$user_fields = self::validate_user_fields( $user_id, $_POST );
-
-			update_user_meta( $user_id, 'wpps_user-example-field1', $user_fields[ 'wpps_user-example-field1' ] );
-			update_user_meta( $user_id, 'wpps_user-example-field2', $user_fields[ 'wpps_user-example-field2' ] );
-		}
-
-		/**
-		 * Validates submitted user field values before they get saved to the database
-		 *
-		 * @mvc Model
-		 *
-		 * @param int   $user_id
-		 * @param array $user_fields
-		 * @return array
-		 */
-		public static function validate_user_fields( $user_id, $user_fields ) {
-			if ( $user_fields[ 'wpps_user-example-field1' ] == false ) {
-				$user_fields[ 'wpps_user-example-field1' ] = true;
-				add_notice( 'Example Field 1 should be true', 'error' );
-			}
-
-			if ( ! current_user_can( 'manage_options' ) ) {
-				$current_field2 = get_user_meta( $user_id, 'wpps_user-example-field2', true );
-
-				if ( $current_field2 != $user_fields[ 'wpps_user-example-field2' ] ) {
-					$user_fields[ 'wpps_user-example-field2' ] = $current_field2;
-					add_notice( 'Only administrators can change Example Field 2.', 'error' );
-				}
-			}
-
-			return $user_fields;
-		}
-	} // end WPPS_Settings
+	} // end CB_Settings
 }

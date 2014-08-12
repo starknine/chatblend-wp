@@ -174,12 +174,12 @@ if ( ! class_exists( 'ChatBlend' ) ) {
 		public function inject_chatblend() {
 			
 			$settings = get_option( 'cb_settings', array() );
-			if(strlen($settings['cb_api-key']) > 0) {
-				$api_key = $settings['cb_api-key'];
-				echo self::render_template( 'cb-settings/chatblend-script.php', compact('api_key') );
-			} else {
-				echo 'ChatBlend Live Chat has been installed but requires an valid API Key to use. Please visit <a href="/wp-admin/options-general.php?page=cb_settings">ChatBlend Plugin Settings Page</a> to configure or visit <a href="https://www.chatblend.com/signup_part1.php">ChatBlend</a> to sign up.';
-			}
+			
+			$api_key = $settings['cb_api-key'];
+			echo self::render_template( 'cb-settings/chatblend-script.php', compact('api_key') );
+			
+				
+		
 			
 		}
 

@@ -4,8 +4,8 @@ Plugin Name: ChatBlend Live Chat
 Plugin URI:  [TODO: Add Plugin Git Repo URL]
 Description: ChatBlend Live Chat Wordpress Plugin
 Version:     0.1a
-Author:      Chris Flynn | Blackstone Media
-Author URI:  http://blackstonemedia.com
+Author:      Chris Flynn | Starknine
+Author URI:  http://starknine.com
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
